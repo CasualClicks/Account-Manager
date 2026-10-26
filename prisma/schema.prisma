@@ -79,8 +79,8 @@ model Transaction {
 model TransactionDocument {
   id            String      @id @default(uuid()) @db.Uuid
   transactionId String      @db.Uuid
-  uploadThingKey String     @unique @db.VarChar(255)
-  url           String      @db.Text
+  objectKey      String     @unique @db.VarChar(1024)
+  bucket        String      @default("assets") @db.VarChar(63)
   fileName      String      @db.VarChar(255)
   mimeType      String      @db.VarChar(100)
   fileSize      Int
@@ -90,3 +90,4 @@ model TransactionDocument {
 
   @@index([transactionId, createdAt])
 }
+
