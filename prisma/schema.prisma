@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PartyType {
+  CUSTOMER
+  SUPPLIER
+}
+
+enum EntryType {
+  DEBIT
+  CREDIT
+}
+
+enum DocumentType {
+  IMAGE
+  PDF
+}
+
+model User {
+  id        String     @id @default(uuid()) @db.Uuid
+  email     String?    @unique
+  name      String?
+  workbooks Workbook[]
+  createdAt DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime   @updatedAt @db.Timestamptz(3)
+}
+
+model Workbook {
+  id        String   @id @default(uuid()) @db.Uuid
+  ownerId   String   @db.Uuid
+  name      String   @db.VarChar(100)
+  currency  String   @default("INR") @db.Char(3)
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  parties   Party[]
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([ownerId, name])
+  @@index([ownerId, updatedAt])
+}
+
+model Party {
+  id             String        @id @default(uuid()) @db.Uuid
+  workbookId     String        @db.Uuid
+  name           String        @db.VarChar(160)
+  type           PartyType
+  // The ledger opening amount is signed: debit balance is positive, credit is negative.
+  openingBalance Decimal       @default(0) @db.Decimal(14, 2)
+  workbook       Workbook      @relation(fields: [workbookId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@index([workbookId, name])
+}
+
+model Transaction {
+  id          String               @id @default(uuid()) @db.Uuid
+  partyId     String               @db.Uuid
+  date        DateTime             @db.Date
+  description String               @db.VarChar(500)
+  amount      Decimal              @db.Decimal(14, 2)
+  entryType   EntryType
+  party       Party                @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  documents   TransactionDocument[]
+  createdAt   DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime             @updatedAt @db.Timestamptz(3)
+
+  @@index([partyId, date, createdAt])
+  @@index([date])
+}
+
+model TransactionDocument {
+  id            String      @id @default(uuid()) @db.Uuid
+  transactionId String      @db.Uuid
+  uploadThingKey String     @unique @db.VarChar(255)
+  url           String      @db.Text
+  fileName      String      @db.VarChar(255)
+  mimeType      String      @db.VarChar(100)
+  fileSize      Int
+  type          DocumentType
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now()) @db.Timestamptz(3)
+
+  @@index([transactionId, createdAt])
+}

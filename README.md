@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ledgerly
 
-## Getting Started
+A responsive account manager starter for separate business workbooks, customers and suppliers, dated ledger entries, batch workflows, and transaction attachments.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Next.js 16 App Router, React, TypeScript, and Tailwind CSS
+- PostgreSQL with Prisma ORM 7 and the `pg` driver adapter
+- UploadThing dependencies are installed; upload routes are intentionally left for the authentication and authorization layer
+- Web app manifest is included for installable mobile and tablet use
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Start locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Install Node.js 22 or newer and PostgreSQL.
+2. Copy `.env.example` to `.env` and set `DATABASE_URL` to your PostgreSQL database.
+3. Install dependencies with `npm install`.
+4. Generate the Prisma client and apply the first migration:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```sh
+   npx prisma generate
+   npx prisma migrate dev --name init
+   ```
 
-## Learn More
+5. Start the development server with `npm run dev`.
 
-To learn more about Next.js, take a look at the following resources:
+The dashboard is a visual starter and currently shows sample data. Database tables and the Prisma client are ready for the next implementation steps. Authentication, CRUD flows, batch import/export, and UploadThing upload handling are not wired yet. Do not expose upload routes until their middleware verifies that the signed-in user owns the workbook and transaction.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Data model
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Each workbook belongs to an owner and holds its own parties. A party has a customer or supplier type and a signed opening ledger balance (debit positive, credit negative). Transactions reference a party by ID, store a `DATE` and an exact decimal amount, and carry a debit/credit entry type. Calendar day/month/year are derived from the transaction date. Insert and update timestamps are stored as `createdAt` and `updatedAt`. Transaction documents store UploadThing keys and metadata; enforce the five-file cap in the authorized transaction upload flow.
 
-## Deploy on Vercel
+The balance shown to a user should be calculated from the opening balance and ledger entries, not duplicated as a manually edited current-balance field. Display labels can interpret the natural balance using party type.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Git workflow
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The local repository starts on `master`. Create and push `dev` and `release` branches when a GitHub remote is connected; no remote has been configured in this workspace yet.
