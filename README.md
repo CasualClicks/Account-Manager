@@ -33,4 +33,5 @@ The balance shown to a user should be calculated from the opening balance and le
 
 ## Git workflow
 
-The local repository starts on `master`. Create and push `dev` and `release` branches when a GitHub remote is connected; no remote has been configured in this workspace yet.
+The GitHub remote is `origin`. Development work goes on `dev`; `release` is reserved for production-ready snapshots. The project currently has a `main` branch on GitHub.
+
