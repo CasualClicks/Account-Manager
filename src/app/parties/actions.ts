@@ -25,7 +25,16 @@ export async function createParty(_state: PartyFormState, formData: FormData): P
 
   const user = await getOwner();
   const workspace = await requireCurrentWorkspace(user.id);
-  await prisma.party.create({ data: { workbookId: workspace.id, name, type, openingBalance } });
+  const duplicate = await prisma.party.findFirst({ where: { workbookId: workspace.id, name: { equals: name, mode: "insensitive" } }, select: { id: true } });
+  if (duplicate) return { error: "A party with that name already exists in this workspace." };
+  try {
+    await prisma.party.create({ data: { workbookId: workspace.id, name, type, openingBalance } });
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2002") {
+      return { error: "A party with that name already exists in this workspace." };
+    }
+    throw error;
+  }
   revalidatePath("/parties");
   redirect("/parties");
 }

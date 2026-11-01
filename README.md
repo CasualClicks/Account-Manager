@@ -38,6 +38,14 @@ Each workbook belongs to an owner and holds its own parties. A party has a custo
 
 The balance shown to a user should be calculated from the opening balance and ledger entries, not duplicated as a manually edited current-balance field. Display labels can interpret the natural balance using party type.
 
+## Deploying
+
+- `npm install` runs `prisma generate` automatically (the generated client is not committed), so hosted builds work without extra steps.
+- Apply database migrations on release with `npm run db:deploy` (uses `prisma7.config.ts` and `DATABASE_URL`). Use `npm run db:migrate` for local development.
+- Set every variable from `.env.example` in the hosting provider, with `NEON_AUTH_COOKIE_SECRET` generated per environment.
+- Run on Node.js 22.12 or newer (the SQLite import uses `node:sqlite`).
+- Party names are unique per workspace. The `party_name_unique` migration renames any existing duplicates as `Name (2)`, `Name (3)` before adding the constraint.
+
 ## Git workflow
 
 The GitHub remote is `origin`. Development work goes on `dev`; `release` is reserved for production-ready snapshots. The project currently has a `main` branch on GitHub.
