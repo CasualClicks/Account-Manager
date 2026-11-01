@@ -3,7 +3,6 @@ import { auth } from "@/lib/auth/server";
 import { requireCurrentWorkspace } from "@/lib/current-workspace";
 import { prisma } from "@/lib/prisma";
 
-export const runtime = "nodejs";
 
 export async function GET() {
   const { data } = await auth.getSession();

@@ -4,7 +4,6 @@ import { requireCurrentWorkspace } from "@/lib/current-workspace";
 import { prisma } from "@/lib/prisma";
 import { deterministicId, parseTransfer } from "@/lib/data-transfer";
 
-export const runtime = "nodejs";
 export const maxDuration = 120;
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const normalize = (s: string) => s.trim().toLocaleLowerCase().replace(/\s+/g, " ");
